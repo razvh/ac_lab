@@ -49,7 +49,7 @@ class MyNet(nn.Module):
         self.conv1 = nn.Conv2d(3, 16, kernel_size=5, stride=1)
         self.batch_norm1 = nn.BatchNorm2d(16)
         self.relu = nn.ReLU()
-        self.max_pool = nn.MaxPool2d(2)  # 16x46x46
+        self.max_pool = nn.MaxPool2d(2)
         self.conv2 = nn.Conv2d(16, 32, kernel_size=3, stride=1)
         self.batch_norm2 = nn.BatchNorm2d(32)
         self.conv3 = nn.Conv2d(32, 64, kernel_size=3, stride=1)
@@ -94,14 +94,11 @@ def train(epochs, lr=0.001):
     ])
     generate()
     shapedata = ShapesDataset(source_transform=transform_train)
-    # train_set, val_set = random_split(shapedata, [2706, 300])
     train_loader = torch.utils.data.DataLoader(shapedata, batch_size=32, shuffle=True)
-    # val_loader = torch.utils.data.DataLoader(val_set, batch_size=32, shuffle=False)
     cross_entropy = nn.CrossEntropyLoss()
     mse = nn.MSELoss()
     model = MyNet()
     optimizer = torch.optim.SGD(model.parameters(), lr, momentum=0.9, weight_decay=0.0001)
-    # min_valid_loss = np.inf
     for epoch in range(epochs):
         print(f'Epoch {epoch + 1}/{epochs}')
         loss_epoch = 0
@@ -132,28 +129,11 @@ def train(epochs, lr=0.001):
                 mse_out3 += loss3
                 total += labels1.size(0)
 
-        # valid_loss = 0
-        # model.eval()
-        # for i, samples in enumerate(val_loader):
-        #     images = samples['image']
-        #     labels1 = samples['labels']['label_name']
-        #     labels2 = samples['labels']['label_color']
-        #     labels3 = samples['labels']['label_area'].float()
-        #     out1, out2, out3 = model(images)
-        #     loss1 = cross_entropy(out1, labels1)
-        #     loss2 = cross_entropy(out2, labels2)
-        #     loss3 = mse(out3, labels3)
-        #     loss = loss1 + loss2 + loss3
-        #     valid_loss += loss.item()
-        # if valid_loss < min_valid_loss:
-        #     min_valid_loss = valid_loss
-        #     torch.save(model.state_dict(), 'shapes_net.pth')
         print(f"Loss : {loss_epoch / len(train_loader) : .4f}")
         print(f"Accuracy_out1 : {accuracy_out1 / total : .4f}")
         print(f"Accuracy_out2 : {accuracy_out2 / total : .4f}")
         print(f"Mse_out3 : {mse_out3 / len(train_loader) : .4f}")
         print('----------------------')
-        # print(f'Validation loss: {valid_loss/ len(val_loader): .4f}')
         print('----------------------')
     test(model)
 
