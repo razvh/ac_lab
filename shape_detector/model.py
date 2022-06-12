@@ -116,7 +116,7 @@ def train(epochs, lr=0.001):
             loss1 = cross_entropy(out1, labels1)
             loss2 = cross_entropy(out2, labels2)
             loss3 = mse(out3, labels3)
-            loss = 0.5*loss1 + 0.1*loss2 + 0.4*loss3
+            loss = loss1 + loss2 + loss3
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -145,9 +145,9 @@ def test(model, directory: str = 'test_set', n: int = 9):
     model.eval()
     fig = plt.figure(figsize=(8, 6))
     for i, img in enumerate(os.listdir(directory)):
-        image = cv2.imread(f'{directory}/{img}')
-        image_tensor = torch.from_numpy(image).permute(2, 0, 1).unsqueeze(0)
-        out1, out2, out3 = model(image_tensor.float())
+        image = io.imread(f'{directory}/{img}')
+        image_tensor = transforms.ToTensor()(np.array(image))
+        out1, out2, out3 = model(image_tensor.unsqueeze(0))
         out1 = torch.argmax(out1, axis=1).item()
         out2 = torch.argmax(out2, axis=1).item()
         out3 = out3.item()
